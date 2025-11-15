@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: qa_service_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: qa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qa_service_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - db
+    volumes:
+      - ./migrations:/app/migrations
+
+volumes:
+  pgdata:

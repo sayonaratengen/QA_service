@@ -1,0 +1,37 @@
+version: '3'
+
+tasks:
+  setup-env:
+    desc: "Создать .env из .env.example, если его нет"
+    cmds:
+      - '[ -f .env ] || cp .env.example .env'
+    silent: true
+
+  build:
+    desc: "Собрать Docker-образ приложения"
+    cmds:
+      - task: setup-env
+      - docker build -t qa_service .
+
+  up:
+    desc: "Собрать и поднять контейнеры (app + db)"
+    cmds:
+      - task: setup-env
+      - docker-compose up --build
+
+  down:
+    desc: "Остановить и удалить контейнеры"
+    cmds:
+      - docker-compose down
+
+  test:
+    desc: "Запустить Go-тесты"
+    cmds:
+      - task: setup-env
+      - go test ./... -v
+
+  migrate:
+    desc: "Применить ВСЕ миграции через goose"
+    cmds:
+      - task: setup-env
+      - docker-compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose up"
