@@ -1,5 +1,14 @@
 version: '3'
 
+vars:
+  DOCKER_COMPOSE:
+    sh: |
+      if command -v docker-compose >/dev/null 2>&1; then
+        echo docker-compose
+      else
+        echo "docker compose"
+      fi
+
 tasks:
   setup-env:
     desc: "Создать .env из .env.example, если его нет"
@@ -17,12 +26,12 @@ tasks:
     desc: "Собрать и поднять контейнеры (app + db)"
     cmds:
       - task: setup-env
-      - docker-compose up --build
+      - "{{.DOCKER_COMPOSE}} up --build"
 
   down:
     desc: "Остановить и удалить контейнеры"
     cmds:
-      - docker-compose down
+      - "{{.DOCKER_COMPOSE}} down"
 
   test:
     desc: "Запустить Go-тесты"
@@ -34,4 +43,4 @@ tasks:
     desc: "Применить ВСЕ миграции через goose"
     cmds:
       - task: setup-env
-      - docker-compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose up"
+      - "{{.DOCKER_COMPOSE}} exec app bash -c \"GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose up\""

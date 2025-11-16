@@ -9,11 +9,24 @@ cp .env.example .env
 
 Поднять сервис и базу можно напрямую через docker-compose (но тогда нужно не забыть создать .env в корне проекта на основе .env.example):
 ```
+docker compose up --build
+
+либо
+
 docker-compose up --build
 ```
 
+_Далее в Taskfile для совместимости используется переменная DOCKER_COMPOSE, поэтому работает и с docker compose (v2), и с docker-compose (v1), но при запуске напрямую отталкивайтесь от вашей версии._
+
+---
+
 Миграции доступны вручную через:
 ```
+docker compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose up <version>"
+docker compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose down <version>"
+
+либо
+
 docker-compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose up <version>"
 docker-compose exec app bash -c "GOOSE_DRIVER=postgres GOOSE_DBSTRING='host=db user=postgres password=pass dbname=qa sslmode=disable' GOOSE_MIGRATION_DIR=/app/migrations goose down <version>"
 ```
